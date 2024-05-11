@@ -16,7 +16,7 @@ input_noise_init = torch.randn(signal.shape)
 input_noise_init = input_noise_init * torch.std(signal) / torch.std(input_noise_init)
 input_noise_init = torch.nn.parameter.Parameter(input_noise_init, requires_grad=True)
 
-mse_loss = torch.nn.MSELoss()  # Assuming CrossEntropyLoss is being used
+mse_loss = torch.nn.MSELoss()  # Assuming L2-Loss is being used
 
 print('Initializing Optimizer')
 iterations_adam = 30000
