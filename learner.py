@@ -142,9 +142,9 @@ class Learner(pl.LightningModule):
     
     def on_validation_epoch_start(self):
          self.val_logs = {
-            "val_Loss": 0,
             "val_CER": 0,
             "val_Accuracy": 0,
+            "val_Loss": 0,
         }
 
     def validation_step(self, batch, _):
