@@ -219,7 +219,7 @@ class Learner(pl.LightningModule):
         hypothesis = [
             self.tokenizer.decode(h) for h in filtered_tokens
         ]
-        return hypothesis
+        return features_joint, hypothesis
 
         
     def configure_optimizers(self):

@@ -2,6 +2,7 @@ import torch
 import torchaudio
 import numpy as np
 import sys
+import scipy
 import torch.optim as optim
 from torch.optim.lr_scheduler import CyclicLR
 from speechbrain.inference.speaker import EncoderClassifier
@@ -59,14 +60,18 @@ for i in range(iterations_adam + 1):
     clr.step()
 
     if i % log_loss_every_num == 0:
+        # save out metamer every n iterations
         input_noise_tensor_optimized = input_noise_init.detach().numpy()
-        print('Saving Weights')
-        np.save('Ecapa_metamer.npy', input_noise_tensor_optimized)
+        print(f'Saving Weights, {i/iterations_adam}%')
+        np.save('ecapa/Ecapa_metamer.npy', input_noise_tensor_optimized)
 
     if i == iterations_adam - 1:
+        # save out final metamer
         print('Saving Final Weights')
-        np.save('Ecapa_metamer.npy', input_noise_tensor_optimized)
+        np.save('ecapa/Ecapa_metamer.npy', input_noise_tensor_optimized)
+        scipy.io.wavfile.write('ecapa/Ecapa_metamer.wav', sr, input_noise_tensor_optimized)
 
     if i % log_loss_every_num == 0:
+        # calculate loss and print
         loss_temp = loss_fn()
         print('Loss Value: ', loss_temp.item())
