@@ -35,7 +35,7 @@ def cer(hypothesis, groundtruth):
 
     return err / tot
 
-
+torch.manual_seed(97)
 sr = 16000 # target sampling rate
 
 # load in joint 
@@ -83,13 +83,17 @@ audio_path_corrected = []
 for i in range(len(audio_path)):
     path = audio_path.iloc[i]
     wav_name = path.split('/')[-1]
-    full_wav_path = os.path.join('/om2/scratch/Fri/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/FAKE_PARSED/', wav_name)
+    full_wav_path = os.path.join('/om2/scratch/Thu/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/FAKE_PARSED/', wav_name)
     audio_path_corrected.append(full_wav_path)
 
 
 ## get the similarity between two combinations of fake and real speakers 
 fake_speakers_score_rating_12 = []
 fake_speakers_score_rating_13 = []
+
+## get the transcription from the saganet
+saganet_transcription_fake = []
+saganet_transcription_real = []
 
 
 target_length = 20 # number of seconds
@@ -102,12 +106,12 @@ similarity = torch.nn.CosineSimilarity(dim=-1, eps=1e-6)
 ## Speaker Identification Score calculation
 
 for i in range(len(audio_path)):
-    audio_1_path = os.path.join('/om2/scratch/Fri/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/FAKE_PARSED/',audio_path.iloc[i]) ## faked speaker
+    audio_1_path = os.path.join('/om2/scratch/Thu/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/FAKE_PARSED/',audio_path.iloc[i]) ## faked speaker
     audio_2_path = os.path.join(
-        '/om2/scratch/Fri/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/REAL_PARSED/',
+        '/om2/scratch/Thu/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/REAL_PARSED/',
         audio_path.iloc[i].split('-')[0]+'-original_'+audio_path.iloc[i].split('_')[1]) ## source speaker
     audio_3_path = os.path.join(
-        '/om2/scratch/Fri/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/REAL_PARSED/',
+        '/om2/scratch/Thu/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/REAL_PARSED/',
         audio_path.iloc[i].split('-')[2].split('_')[0].lower()+'-original_2.wav') ## target speaker original
 
     fake_audio, sr_audio = torchaudio.load(audio_1_path)
@@ -126,13 +130,28 @@ for i in range(len(audio_path)):
 
     score12 = similarity(decoder_output_audio_1, decoder_output_audio_2)
     score13 = similarity(decoder_output_audio_1, decoder_output_audio_3)
+
+    print(score12)
+    print(score13)
+
+    # print(saganet.speaker_decoder.linear_project_speaker.weight)
+
+    saganet_transcription_fake.append(saganet({'input_values': input_audio_1.unsqueeze(0)})[1])
+    saganet_transcription_real.append(saganet({'input_values': input_audio_2.unsqueeze(0)})[1])
     
     fake_speakers_score_rating_12.append(score12.cpu().detach().numpy()) # score between fake voice and source real voice -- high score means the fake voice retains a lot of info from the source voice, i.e., not good deepfake
     fake_speakers_score_rating_13.append(score13.cpu().detach().numpy()) # score between target voice real and fake -- high score means the deepfaking is good; should match with human rating
 
 print('Finished embedding extraction')
-## Human Data Preparation:
 
+df = pd.DataFrame()
+df['Audio_Name'] = audio_path
+df['Saganet_on_Fake'] = saganet_transcription_fake
+df['Saganet_on_Real'] = saganet_transcription_real
+
+df.to_csv('Saganet_Transcription_Fake_and_Real_Speech.csv')
+
+# Human Data Preparation:
 
 sub_1 = pd.read_csv('/om2/user/annesyab/SLP_Project_2024/voice-speech-metamers/deepfake_evaluation/Human_Experiment_Data/Voice_Identification_Experiment - Gasser.csv')
 sub_2 = pd.read_csv('/om2/user/annesyab/SLP_Project_2024/voice-speech-metamers/deepfake_evaluation/Human_Experiment_Data/Voice_Identification_Experiment - Sagarika.csv')
@@ -172,6 +191,6 @@ plt.title('Rating vs Score')
 plt.xlim([1,5])
 plt.ylim([0,1])
 
-plt.savefig('JointModel_Speaker.jpg')
+# plt.savefig('JointModel_Speaker.jpg')
 
 
