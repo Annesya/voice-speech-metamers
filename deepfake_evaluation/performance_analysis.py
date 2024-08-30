@@ -1,6 +1,18 @@
 import pandas as pd
 import numpy as np
-from joint_model_test import cer
+
+import editdistance as ed 
+def cer(hypothesis, groundtruth):
+    err = 0
+    tot = 0
+    for p, t in zip(hypothesis, groundtruth):
+        p = p.split(' ')
+        t = t.split(' ')
+        err += float(ed.eval(p, t))
+        tot += len(t)
+        breakpoint()
+
+    return err / tot
 
 
 csv_path = "/om2/user/annesyab/SLP_Project_2024/voice-speech-metamers/deepfake_evaluation/Saganet_Transcription_Fake_and_Real_Speech.csv"
