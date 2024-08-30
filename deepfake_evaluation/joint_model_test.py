@@ -127,8 +127,8 @@ for i in range(len(audio_path)):
     score12 = similarity(decoder_output_audio_1, decoder_output_audio_2)
     score13 = similarity(decoder_output_audio_1, decoder_output_audio_3)
     
-    fake_speakers_score_rating_12.append(score12) # score between fake voice and source real voice -- high score means the fake voice retains a lot of info from the source voice, i.e., not good deepfake
-    fake_speakers_score_rating_13.append(score13) # score between target voice real and fake -- high score means the deepfaking is good; should match with human rating
+    fake_speakers_score_rating_12.append(score12.cpu().detach().numpy()) # score between fake voice and source real voice -- high score means the fake voice retains a lot of info from the source voice, i.e., not good deepfake
+    fake_speakers_score_rating_13.append(score13.cpu().detach().numpy()) # score between target voice real and fake -- high score means the deepfaking is good; should match with human rating
 
 print('Finished embedding extraction')
 ## Human Data Preparation:
@@ -155,7 +155,12 @@ sub_4_rating = [sub_4_rating.iloc[i] for i in range(len(sub_4_rating))]
 sub_5_rating = [sub_5_rating.iloc[i] for i in range(len(sub_5_rating))]
 sub_6_rating = [sub_6_rating.iloc[i] for i in range(len(sub_6_rating))]
 
-subject_response_mean = (np.array(sub_1_rating)+np.array(sub_2_rating)+np.array(sub_3_rating)+np.array(sub_4_rating)+np.array(sub_5_rating)+np.array(sub_6_rating))/6
+subject_response_mean = (np.array(sub_1_rating, dtype=float) + 
+                         np.array(sub_2_rating, dtype=float) + 
+                         np.array(sub_3_rating, dtype=float) + 
+                         np.array(sub_4_rating, dtype=float) + 
+                         np.array(sub_5_rating, dtype=float) + 
+                         np.array(sub_6_rating, dtype=float)) / 6
 
 plt.figure(figsize=[6,4])
 plt.scatter(subject_response_mean, np.array(fake_speakers_score_rating_13))
