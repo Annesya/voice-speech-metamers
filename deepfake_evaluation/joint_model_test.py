@@ -131,8 +131,8 @@ for i in range(len(audio_path)):
     score12 = similarity(decoder_output_audio_1, decoder_output_audio_2)
     score13 = similarity(decoder_output_audio_1, decoder_output_audio_3)
 
-    print(score12)
-    print(score13)
+    # print(score12)
+    # print(score13)
 
     # print(saganet.speaker_decoder.linear_project_speaker.weight)
 
@@ -145,9 +145,12 @@ for i in range(len(audio_path)):
 print('Finished embedding extraction')
 
 df = pd.DataFrame()
-df['Audio_Name'] = audio_path
+df['Audio_Name'] = audio_path_corrected
 df['Saganet_on_Fake'] = saganet_transcription_fake
 df['Saganet_on_Real'] = saganet_transcription_real
+
+df['Score_Fake_Real_Target_Speaker'] = fake_speakers_score_rating_13
+df['Score_Fake_Target_Real_Source_Speaker'] = fake_speakers_score_rating_12
 
 df.to_csv('Saganet_Transcription_Fake_and_Real_Speech.csv')
 
@@ -191,6 +194,6 @@ plt.title('Rating vs Score')
 plt.xlim([1,5])
 plt.ylim([0,1])
 
-# plt.savefig('JointModel_Speaker.jpg')
+plt.savefig('JointModel_Speaker.jpg')
 
 
