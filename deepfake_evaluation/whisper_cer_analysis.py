@@ -99,6 +99,7 @@ num_samples = int(target_length * sr)
 resampler = torchaudio.transforms.Resample(44100, sr)
 
 ## Speech recognition score calculation
+error_rate = []
 
 for i in range(len(audio_path)):
     audio_1_path = os.path.join('/om2/scratch/Thu/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/FAKE_PARSED/',audio_path.iloc[i]) ## faked speaker
@@ -115,6 +116,7 @@ for i in range(len(audio_path)):
 
     whisper_cer_transcription_fake.append(whisper({'input_values': input_audio_1.unsqueeze(0)})[1])
     whisper_cer_transcription_real.append(whisper({'input_values': input_audio_2.unsqueeze(0)})[1])
+    error_rate.append(cer(whisper({'input_values': input_audio_1.unsqueeze(0)})[1], whisper({'input_values': input_audio_2.unsqueeze(0)})[1]))
     
 print('Finished embedding extraction')
 
@@ -123,7 +125,7 @@ df['Audio_Name'] = audio_path_corrected
 df['WhisperCER_on_Fake'] = whisper_cer_transcription_fake
 df['WhisperCER_on_Real'] = whisper_cer_transcription_real
 
-df.to_csv('Saganet_Transcription_Fake_and_Real_Speech_v2.csv')
+df.to_csv('Whisper_CER_Transcription_Fake_and_Real_Speech.csv')
 
 # Human Data Preparation:
 
@@ -156,7 +158,7 @@ subject_response_mean = (np.array(sub_1_rating, dtype=float) +
                          np.array(sub_6_rating, dtype=float)) / 6
 
 plt.figure(figsize=[6,4])
-plt.scatter(subject_response_mean, np.array(whisper_cer_transcription_fake))
+plt.scatter(subject_response_mean, np.array(error_rate))
 plt.legend()
 plt.ylim([0,1])
 plt.xlabel('Mean Rating')
