@@ -47,7 +47,7 @@ for i in range(len(audio_files)):
   audio_1_path = os.path.join('/om2/scratch/Thu/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/REAL_PARSED/',audio_files[i]) ## faked speaker
   real_audio, sr_audio = torchaudio.load(audio_1_path)
   real_audio = resampler(real_audio)
-  input_audio_1 = real_audio
+  input_audio_1 = real_audio[0,:]
 
   # decode token ids to text
   transcription = run_whisper(input_audio_1)
