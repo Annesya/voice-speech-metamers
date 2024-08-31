@@ -152,7 +152,7 @@ df['Saganet_on_Real'] = saganet_transcription_real
 df['Score_Fake_Real_Target_Speaker'] = fake_speakers_score_rating_13
 df['Score_Fake_Target_Real_Source_Speaker'] = fake_speakers_score_rating_12
 
-df.to_csv('Saganet_Transcription_Fake_and_Real_Speech.csv')
+df.to_csv('Saganet_Transcription_Fake_and_Real_Speech_v2.csv')
 
 # Human Data Preparation:
 
@@ -194,6 +194,6 @@ plt.title('Rating vs Score')
 plt.xlim([1,5])
 plt.ylim([0,1])
 
-plt.savefig('JointModel_Speaker.jpg')
+plt.savefig('JointModel_Speaker_v2.jpg')
 
 
