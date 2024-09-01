@@ -37,14 +37,14 @@ def run_whisper(input):
 
 ## Read all the data 
 df = pd.read_csv('/om2/user/annesyab/SLP_Project_2024/voice-speech-metamers/deepfake_evaluation/Human_Experiment_Data/Copy of Voice_Identification_Experiment - Annesya.csv')
-audio_files = glob.glob('/om2/scratch/Thu/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/REAL_PARSED/*.wav')
+audio_files = glob.glob('/om2/scratch/Thu/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/REAL/*.wav')
 
 real_transcript = []
 
 resampler = torchaudio.transforms.Resample(44100, sr)
 
 for i in range(len(audio_files)):
-  audio_1_path = os.path.join('/om2/scratch/Thu/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/REAL_PARSED/',audio_files[i]) ## faked speaker
+  audio_1_path = os.path.join('/om2/scratch/Thu/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/REAL/',audio_files[i]) 
   real_audio, sr_audio = torchaudio.load(audio_1_path)
   real_audio = resampler(real_audio)
   input_audio_1 = real_audio[0,:]
@@ -57,4 +57,28 @@ df = pd.DataFrame()
 df['Audio_Name'] = audio_files
 df['Whisper_Real_Full'] = real_transcript
 
-df.to_csv('Whisper_Transcription_RealSpeech_FULL.csv')
+df.to_csv('Whisper_Transcription_RealSpeech_FULL_NoParsing.csv')
+
+
+## Read all the data 
+audio_files = glob.glob('/om2/scratch/Thu/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/FAKE/*.wav')
+
+real_transcript = []
+
+resampler = torchaudio.transforms.Resample(44100, sr)
+
+for i in range(len(audio_files)):
+  audio_1_path = os.path.join('/om2/scratch/Thu/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/FAKE/',audio_files[i]) 
+  real_audio, sr_audio = torchaudio.load(audio_1_path)
+  real_audio = resampler(real_audio)
+  input_audio_1 = real_audio[0,:]
+
+  # decode token ids to text
+  transcription = run_whisper(input_audio_1)
+  real_transcript.append(transcription)
+
+df = pd.DataFrame()
+df['Audio_Name'] = audio_files
+df['Whisper_Fake_Full'] = real_transcript
+
+df.to_csv('Whisper_Transcription_FakeSpeech_FULL_NoParsing.csv')
