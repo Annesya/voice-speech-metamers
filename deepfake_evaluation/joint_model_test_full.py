@@ -88,12 +88,8 @@ for i in range(len(audio_path)):
 
 
 ## get the similarity between two combinations of fake and real speakers 
-fake_speakers_score_rating_12 = []
+fake_speakers_score_rating_13_std = []
 fake_speakers_score_rating_13 = []
-
-## get the transcription from the saganet
-saganet_transcription_fake = []
-saganet_transcription_real = []
 
 
 target_length = 20 # number of seconds
@@ -106,15 +102,18 @@ similarity = torch.nn.CosineSimilarity(dim=-1, eps=1e-6)
 ## Speaker Identification Score calculation
 
 for i in range(len(audio_path)):
-    audio_1_path = os.path.join('/om2/scratch/Thu/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/FAKE_PARSED/',audio_path.iloc[i]) ## faked speaker
+
+    # embedding of the true voice of the target speaker
+    target_speaker_true =  '/om2/scratch/Thu/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/REAL_PARSED/'+audio_path.iloc[i].split('-')[2].split('_')[0].lower()+'-original_2.wav'
+    audio_1_path = target_speaker_true
     fake_audio, sr_audio = torchaudio.load(audio_1_path)
     fake_audio = resampler(fake_audio)
     input_audio_1 = fake_audio[0,:]
     decoder_output_audio_1 = saganet.speaker_decoder.linear_project_speaker(torch.mean(saganet({'input_values': input_audio_1.unsqueeze(0)})[0],dim=1))
 
     score_temp = []
-    target_speaker =  '/om2/scratch/Thu/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/REAL_PARSED/'+audio_path.iloc[i].split('-')[2].split('_')[0].lower()+'-original*'
-    files_all = glob.glob(target_speaker)
+    # all the audios with the target_speaker_fake_voisce and that specific conversion
+    files_all = glob.glob('/om2/scratch/Thu/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/FAKE_PARSED/'+audio_path.iloc[i].split('_')[0]+'_*')
 
     for j in range(len(files_all)):
         audio_3_path = os.path.join('/om2/scratch/Thu/annesyab/Deepfake_Datasets/archive/KAGGLE/AUDIO/REAL_PARSED/', files_all[j])
@@ -126,8 +125,10 @@ for i in range(len(audio_path)):
         score_temp.append(score13.cpu().detach().numpy())
     
     score_temp_np = np.mean(np.array(score_temp))
+    score_temp_std = np.std(np.array(score_temp))
 
     fake_speakers_score_rating_13.append(score_temp_np) # score between target voice real and fake -- high score means the deepfaking is good; should match with human rating
+    fake_speakers_score_rating_13_std.append(score_temp_std)
 
 print('Finished embedding extraction')
 
@@ -164,23 +165,34 @@ sub_4_rating = [sub_4_rating.iloc[i] for i in range(len(sub_4_rating))]
 sub_5_rating = [sub_5_rating.iloc[i] for i in range(len(sub_5_rating))]
 sub_6_rating = [sub_6_rating.iloc[i] for i in range(len(sub_6_rating))]
 
-subject_response_mean = (np.array(sub_1_rating, dtype=float) + 
-                         np.array(sub_2_rating, dtype=float) + 
-                         np.array(sub_3_rating, dtype=float) + 
-                         np.array(sub_4_rating, dtype=float) + 
-                         np.array(sub_5_rating, dtype=float) + 
-                         np.array(sub_6_rating, dtype=float)) / 6
+subject_response_matrix = np.zeros([6,32])
+
+subject_response_matrix[0,:] = np.array(sub_1_rating, dtype=float)
+subject_response_matrix[1,:] = np.array(sub_2_rating, dtype=float)
+subject_response_matrix[2,:] = np.array(sub_3_rating, dtype=float)
+subject_response_matrix[3,:] = np.array(sub_4_rating, dtype=float)
+subject_response_matrix[4,:] = np.array(sub_5_rating, dtype=float)
+subject_response_matrix[5,:] = np.array(sub_6_rating, dtype=float)
+
+
+subject_response_mean = np.mean(subject_response_matrix, axis=0)
+subject_response_std = np.std(subject_response_matrix, axis=0)
+
+x = np.arange(32)
 
 plt.figure(figsize=[6,4])
-plt.scatter(subject_response_mean, np.array(fake_speakers_score_rating_13))
-plt.legend()
-plt.ylim([0,1])
-plt.xlabel('Mean Rating')
-plt.ylabel('Joint Model Score')
-plt.title('Rating vs Score')
-plt.xlim([1,5])
-plt.ylim([0,1])
+plt.errorbar(x, subject_response_mean, subject_response_std, label='Subject Rating')
+plt.errorbar(x, np.array(fake_speakers_score_rating_13), np.array(fake_speakers_score_rating_13_std), label='Joint Model Score')
 
-plt.savefig('JointModel_Speaker_FullSet.jpg')
+# plt.scatter(subject_response_mean, np.array(fake_speakers_score_rating_13))
+plt.legend()
+# plt.ylim([0,1])
+plt.xlabel('Conversion Scenario')
+plt.ylabel('Scoring/Rating')
+plt.title('Rating and Score across Conversions')
+# plt.xlim([1,5])
+# plt.ylim([0,1])
+
+plt.savefig('JointModel_vs_Human_FullSet_VariableConversions.jpg')
 
 
