@@ -4,3 +4,5 @@
 *.err
 *.ckpt
 *.pyc
+*.jpg
+*.npy
