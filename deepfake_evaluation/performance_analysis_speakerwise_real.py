@@ -37,6 +37,9 @@ for speaker in unique_speakers:
     cer_dict_mean[speaker] = cer_mean
     cer_dict_std[speaker] = cer_std
 
+np.save('Joint_OnReal_Mean.npy', cer_dict_mean)
+np.save('Joint_OnReal_STD.npy', cer_dict_std)
+
 plt.figure(figsize=[10,6])
 
 plt.subplot(1,2,1)
@@ -84,6 +87,9 @@ for speaker in unique_speakers:
 
     cer_dict_mean[speaker] = cer_mean
     cer_dict_std[speaker] = cer_std
+
+np.save('WhisperCER_OnReal_Mean.npy', cer_dict_mean)
+np.save('WhisperCER_OnReal_STD.npy', cer_dict_std)
 
 # plt.figure()
 plt.subplot(1,2,2)
