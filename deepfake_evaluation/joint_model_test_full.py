@@ -167,6 +167,10 @@ sub_6_rating = [sub_6_rating.iloc[i] for i in range(len(sub_6_rating))]
 
 subject_response_matrix = np.zeros([6,32])
 
+# modifying the human rating from 1 to 5 scale to 0 to 1 scale for match with the score data 
+m = 0.25
+c = -0.25
+
 subject_response_matrix[0,:] = np.array(sub_1_rating, dtype=float)
 subject_response_matrix[1,:] = np.array(sub_2_rating, dtype=float)
 subject_response_matrix[2,:] = np.array(sub_3_rating, dtype=float)
@@ -174,6 +178,7 @@ subject_response_matrix[3,:] = np.array(sub_4_rating, dtype=float)
 subject_response_matrix[4,:] = np.array(sub_5_rating, dtype=float)
 subject_response_matrix[5,:] = np.array(sub_6_rating, dtype=float)
 
+subject_response_matrix = m*subject_response_matrix+c
 
 subject_response_mean = np.mean(subject_response_matrix, axis=0)
 subject_response_std = np.std(subject_response_matrix, axis=0)
@@ -193,6 +198,6 @@ plt.title('Rating and Score across Conversions')
 # plt.xlim([1,5])
 # plt.ylim([0,1])
 
-plt.savefig('JointModel_vs_Human_FullSet_VariableConversions.jpg')
+plt.savefig('JointModel_vs_Human_FullSet_VariableConversions_v2.jpg')
 
 
